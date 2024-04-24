@@ -2,15 +2,22 @@
 layout: default
 ---
 
-<article class="px-4 lg:px-0">
-  <h1 class="text-2xl font-semibold tracking-tight text-stone-700">{{ page.title }}</h1>
+<article class="px-4 pb-8 lg:px-0 lg:pb-20">
+    <h1 class="text-4xl font-semibold tracking-tight text-stone-700">
+        {{ page.title }}
+    </h1>
 
-  <time datetime="{{ page.last_modified_at | date_to_xmlschema }}" class="text-sm text-slate-500">
-    {% if page.type != 'pages' %}
-      Last updated on
-      {{ page.last_modified_at | date: "%B %-d, %Y" }}
-    {% endif %}
-  </time>
+    <time
+        datetime="{{ page.last_modified_at | date_to_xmlschema }}"
+        class="text-sm text-stone-500"
+    >
+        {% if page.type != 'pages' %} Last updated on {{ page.last_modified_at |
+        date: "%B %-d, %Y" }} {% endif %}
+    </time>
 
-  <div class="mt-4 prose lg:mt-8 max-w-none prose-stone prose-headings:text-stone-700">{{ content }}</div>
+    <div
+        class="mt-4 prose lg:mt-8 max-w-none prose-stone prose-headings:text-stone-700"
+    >
+        {{ content }}
+    </div>
 </article>

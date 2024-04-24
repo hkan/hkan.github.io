@@ -20,7 +20,6 @@ open_external_links_in_new_tab: true
 embed_tweets: true
 
 permalink: pretty
-relative_permalinks: false
 
 plugins:
   - jekyll-last-modified-at
@@ -29,7 +28,7 @@ plugins:
 collections:
   notes:
     output: true
-    permalink: /:slug
+    permalink: /:year-:month-:day-:title
 
 defaults:
   - scope:
