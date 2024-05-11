@@ -7,11 +7,9 @@ I have a theory that I have also been putting into practice:
 
 Until you have an obvious path for abstracting your code to some other place, whether to make it reusable or just for better code organisation, it's *fine* to write it directly in your controllers.
 
-<!--
-<center>https://twitter.com/hkanaktas/status/1789271576585613664</center>
--->
-
----
+<center>
+https://twitter.com/hkanaktas/status/1789271576585613664
+</center>
 
 In late 2023, I have started building a web application in my free time. Because the entrepreneur itch might decrease seasonally, but it never goes away. In majority of my previous entrepreneurial attempts, I was an idealist and tried to build the best software I could achieve. All of those attempts took way too long to build. This one had to be different, as I had limited time on my hands to design a product, write code, and ship it. So I decided to cut some corners.
 
