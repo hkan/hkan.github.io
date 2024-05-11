@@ -8,15 +8,16 @@ layout: default
     </h1>
 
     <time
-        datetime="{{ page.last_modified_at | date_to_xmlschema }}"
+        datetime="{{ page.date | date_to_xmlschema }}"
         class="text-sm text-stone-500"
     >
-        {% if page.type != 'pages' %} Last updated on {{ page.last_modified_at |
-        date: "%B %-d, %Y" }} {% endif %}
+        {% if page.type != 'pages' %}
+            Published on {{ page.date | date: "%A" }}, {{ page.date | date_to_long_string }}
+        {% endif %}
     </time>
 
     <div
-        class="mt-4 prose lg:mt-8 max-w-none prose-stone prose-headings:text-stone-700"
+        class="mt-4 prose lg:mt-8 max-w-none prose-stone prose-headings:text-stone-700 prose-pre:bg-white"
     >
         {{ content }}
     </div>
