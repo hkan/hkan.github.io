@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+    <head>
+  <meta charset="UTF-8" />
+
+  <link rel="canonical" href="/2024-05-11-i-write-my-code-in-controller" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta
+    name="description"
+    content="I have a theory that I have also been putting into practice:"
+  />
+
+  <meta property="og:site_name" content="Hakan Aktaş" />
+
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/assets/css/syntax-highlight.css" />
+
+  
+  <meta
+    property="og:description"
+    content="I have a theory that I have also been putting into practice:"
+  />
+   
+  <meta property="og:title" content="I write my code in the controller" />
+  <meta property="og:type" content="article" />
+   
+  <meta
+    property="article:published_time"
+    content="2024-05-11T17:00:00+00:00"
+  />
+  <meta property="article:author" content="/" />
+  
+
+  <meta property="og:url" content="/2024-05-11-i-write-my-code-in-controller" />
+
+  
+
+  <title>
+     I write my code in the controller
+    &mdash; Hakan Aktaş 
+  </title>
+</head>
+
+
+    <body class="font-sans bg-stone-50">
+        <div class="container max-w-3xl mx-auto">
+            <section class="px-4 py-6 mb-6 text-center lg:py-8 lg:-mx-4 lg:mb-10">
+  <nav class="flex gap-4 mt-2 text-stone-600 lg:text-lg lg:gap-6 lg:mt-0">
+    <a href="/about">About</a>
+    <a href="/">Blog</a>
+  </nav>
+</section>
+ <article class="px-4 pb-8 lg:px-0 lg:pb-20">
+    <h1 class="text-4xl font-semibold tracking-tight text-stone-700">
+        I write my code in the controller
+    </h1>
+
+    <time
+        datetime="2024-05-11T17:00:00+00:00"
+        class="text-sm text-stone-500"
+    >
+        
+            Published on Saturday, 11 May 2024
+        
+    </time>
+
+    <div
+        class="mt-4 prose lg:mt-8 max-w-none prose-stone prose-headings:text-stone-700 prose-pre:bg-white"
+    >
+        <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><body>
+<p>I have a theory that I have also been putting into practice:</p>
+
+<p>Until you have an obvious path for abstracting your code to some other place, whether to make it reusable or just for better code organisation, it’s <em>fine</em> to write it directly in your controllers.</p>
+
+<!--
+<center>https://twitter.com/hkanaktas/status/1789271576585613664</center>
+-->
+
+<hr>
+
+<p>In late 2023, I have started building a web application in my free time. Because the entrepreneur itch might decrease seasonally, but it never goes away. In majority of my previous entrepreneurial attempts, I was an idealist and tried to build the best software I could achieve. All of those attempts took way too long to build. This one had to be different, as I had limited time on my hands to design a product, write code, and ship it. So I decided to cut some corners.</p>
+
+<p>To set the context…</p>
+
+<ul>
+  <li>What I’m building is a personal budgeting app</li>
+  <li>I build it as a Laravel API and a Next.js app, though this post focuses on the API part</li>
+</ul>
+
+<p>I began my adventure by building a basic transaction tracking feature. So, all I implemented was mostly just <abbr title="Create, read, update, delete">CRUD</abbr> functionality for a few entities.</p>
+
+<h3 id="first-steps-basics-of-transactions">First steps: Basics of transactions</h3>
+
+<p>I have started by creating the Eloquent model, and writing a couple tests as a start.</p>
+
+<details>
+  <summary>Click to see the tests</summary>
+
+  <div class="language-php highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">AddingTransactionsTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
+<span class="p">{</span>
+    <span class="c1">// ...</span>
+    
+    <span class="cd">/** @test */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">user_can_create_expense_transaction</span><span class="p">():</span> <span class="kt">void</span>
+    <span class="p">{</span>
+        <span class="nv">$user</span> <span class="o">=</span> <span class="nc">User</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+        
+        <span class="cd">/** @var Account $account */</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$user</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nv">$user</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="nf">postJson</span><span class="p">(</span><span class="s1">'/v1/transactions'</span><span class="p">,</span> <span class="p">[</span>
+                <span class="s1">'account_id'</span> <span class="o">=&gt;</span> <span class="nv">$account</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span>
+                <span class="s1">'amount'</span> <span class="o">=&gt;</span> <span class="o">-</span><span class="mi">1000</span><span class="p">,</span>
+                <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">addDays</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">format</span><span class="p">(</span><span class="s1">'Y-m-d'</span><span class="p">),</span>
+            <span class="p">])</span>
+            <span class="o">-&gt;</span><span class="nf">assertCreated</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">assertDatabaseHas</span><span class="p">(</span><span class="nc">Transaction</span><span class="o">::</span><span class="n">class</span><span class="p">,</span> <span class="p">[</span>
+            <span class="s1">'account_id'</span> <span class="o">=&gt;</span> <span class="nv">$account</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span>
+            <span class="s1">'amount'</span> <span class="o">=&gt;</span> <span class="o">-</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="p">]);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>  </div>
+</details>
+
+<p>The implementation:</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// File: app/Http/Controllers/TransactionController.php</span>
+
+<span class="kd">class</span> <span class="nc">TransactionController</span> <span class="kd">extends</span> <span class="nc">Controller</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">store</span><span class="p">(</span><span class="kt">Request</span> <span class="nv">$request</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$data</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">validate</span><span class="p">([</span>
+            <span class="s1">'account_id'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+                <span class="s1">'required'</span><span class="p">,</span>
+                <span class="s1">'uuid'</span><span class="p">,</span>
+                <span class="nc">Rule</span><span class="o">::</span><span class="nf">exists</span><span class="p">(</span><span class="nc">Account</span><span class="o">::</span><span class="n">class</span><span class="p">,</span> <span class="s1">'id'</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">where</span><span class="p">(</span><span class="s1">'user_id'</span><span class="p">,</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">user</span><span class="p">())</span>
+            <span class="p">],</span>
+            <span class="s1">'amount'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'numeric'</span><span class="p">],</span>
+            <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'date:Y-m-d'</span><span class="p">],</span>
+        <span class="p">]);</span>
+
+        <span class="nv">$transaction</span> <span class="o">=</span> <span class="nc">Transaction</span><span class="o">::</span><span class="nf">create</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nf">response</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">json</span><span class="p">([</span><span class="s1">'data'</span> <span class="o">=&gt;</span> <span class="nv">$transaction</span><span class="p">],</span> <span class="mi">201</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Although I didn’t include them in the snippets, I built all other CRUD operations in the same controller.</p>
+
+<p>I know what you’re thinking. That’s a dead simple feature, of course it’s fine to have all of that in the controller. This approach will hold up to pretty high complexities, but talk is cheap, so let’s introduce some slight complexity to demonstrate.</p>
+
+<h3 id="the-intricacies">The intricacies</h3>
+
+<p>I need to recalculate account balances whenever a transaction is created, updated, or deleted. Since all of these actions can only be done in the controller so far, I opt to keep the logic within the controller.</p>
+
+<details>
+  <summary>Click to see the tests</summary>
+
+  <div class="language-php highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1">// File: tests/Feature/Accounts/AccountBalancesTest.php</span>
+
+<span class="kd">class</span> <span class="nc">AccountBalancesTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
+<span class="p">{</span>
+    <span class="cd">/** @test */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">past_transactions_affect_account_balance</span><span class="p">():</span> <span class="kt">void</span>
+    <span class="p">{</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+
+        <span class="nv">$postData</span> <span class="o">=</span> <span class="nc">Transaction</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span>
+            <span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$account</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="nf">makeOne</span><span class="p">([</span><span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">addDays</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">format</span><span class="p">(</span><span class="s1">'Y-m-d'</span><span class="p">)])</span>
+            <span class="o">-&gt;</span><span class="nf">only</span><span class="p">([</span>
+                <span class="s1">'account_id'</span><span class="p">,</span>
+                <span class="s1">'amount'</span><span class="p">,</span>
+                <span class="s1">'transaction_date'</span><span class="p">,</span>
+            <span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nv">$account</span><span class="o">-&gt;</span><span class="n">user</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="nf">postJson</span><span class="p">(</span><span class="s1">'v1/transactions'</span><span class="p">,</span> <span class="nv">$postData</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="nf">assertSuccessful</span><span class="p">()</span>
+
+        <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">refresh</span><span class="p">();</span>
+
+        <span class="c1">// This is a custom assertion method I made that effectively runs</span>
+        <span class="c1">// `-&gt;assertEquals($one-&gt;getAmount(), $two-&gt;getAmount())`.</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">assertMoneyEquals</span><span class="p">(</span>
+            <span class="nv">$transactions</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+            <span class="nv">$account</span><span class="o">-&gt;</span><span class="n">balance</span><span class="p">,</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>  </div>
+</details>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// File: app/Http/Controllers/TransactionController.php</span>
+
+<span class="kd">class</span> <span class="nc">TransactionController</span> <span class="kd">extends</span> <span class="nc">Controller</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">store</span><span class="p">(</span><span class="kt">Request</span> <span class="nv">$request</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// ...</span>
+
+        <span class="nv">$transaction</span> <span class="o">=</span> <span class="nc">Transaction</span><span class="o">::</span><span class="nf">create</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+
+        <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="n">account</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">([</span>
+            <span class="s1">'balance'</span> <span class="o">=&gt;</span> <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="n">account</span><span class="o">-&gt;</span><span class="nf">transactions</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+        <span class="p">]);</span>
+
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>That’s it!</strong> That’s the whole implementation.</p>
+
+<details>
+  <summary>
+I copy-pasted the code to the controller methods `update` and `delete` as well. Click to check their implementations. There is slight differences.
+</summary>
+
+  <div class="language-php highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1">// File: app/Http/Controllers/TransactionController.php</span>
+
+<span class="kd">class</span> <span class="nc">TransactionController</span> <span class="kd">extends</span> <span class="nc">Controller</span>
+<span class="p">{</span>
+    <span class="c1">// ...</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="n">update</span><span class="p">(</span><span class="kt">Request</span> <span class="nv">$request</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$data</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">validate</span><span class="p">([</span>
+            <span class="s1">'account_id'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+                <span class="s1">'required'</span><span class="p">,</span>
+                <span class="s1">'uuid'</span><span class="p">,</span>
+                <span class="nc">Rule</span><span class="o">::</span><span class="nf">exists</span><span class="p">(</span><span class="nc">Account</span><span class="o">::</span><span class="n">class</span><span class="p">,</span> <span class="s1">'id'</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">where</span><span class="p">(</span><span class="s1">'user_id'</span><span class="p">,</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">user</span><span class="p">())</span>
+            <span class="p">],</span>
+            <span class="s1">'amount'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'numeric'</span><span class="p">],</span>
+            <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'date:Y-m-d'</span><span class="p">],</span>
+        <span class="p">]);</span>
+
+        <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+
+        <span class="cm">/*
+         * There is a slight difference in this method. The user can change
+         * accounts, and when that happens we need to update both. Though it's
+         * still the same code, just applied to two accounts instead of one.
+         */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$transaction</span><span class="o">-&gt;</span><span class="nf">wasChanged</span><span class="p">(</span><span class="s1">'account_id'</span><span class="p">))</span> <span class="p">{</span>
+            <span class="nv">$oldAccount</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">find</span><span class="p">(</span><span class="nv">$transaction</span><span class="o">-&gt;</span><span class="nf">getOriginal</span><span class="p">(</span><span class="s1">'account_id'</span><span class="p">));</span>
+
+            <span class="nv">$oldAccount</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">([</span>
+                <span class="s1">'balance'</span> <span class="o">=&gt;</span> <span class="nv">$oldAccount</span><span class="o">-&gt;</span><span class="nf">transactions</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+            <span class="p">]);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="n">account</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">([</span>
+            <span class="s1">'balance'</span> <span class="o">=&gt;</span> <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="n">account</span><span class="o">-&gt;</span><span class="nf">transactions</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+        <span class="p">]);</span>
+
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="n">delete</span><span class="p">(</span><span class="kt">Request</span> <span class="nv">$request</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="n">account</span><span class="p">;</span>
+
+        <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="nb">delete</span><span class="p">();</span>
+
+        <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">([</span>
+            <span class="s1">'balance'</span> <span class="o">=&gt;</span> <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">transactions</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+        <span class="p">]);</span>
+
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>  </div>
+</details>
+
+<p>A point can be made here that the account balance recalculation should happen on a service class or a job class, which wouldn’t be the worst idea, but I have a better one!</p>
+
+<h3 id="the-optimisation-events-and-listeners">The optimisation: Events and listeners</h3>
+
+<p>Semantically speaking, when a user asks the API to create a transaction, we can say that updating the account balance is a side-effect. That’s because user’s request does not explicitly say anything about what happens to accounts. So I want to treat this functionality as a side-effect, and to me that means decoupling the two operations. I chose to do this via events and listeners.</p>
+
+<h4 id="step-1-create-the-events">Step 1: Create the events</h4>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// File: app/Events/TransactionCreated.php</span>
+<span class="c1">// File: app/Events/TransactionUpdated.php</span>
+<span class="c1">// File: app/Events/TransactionDeleted.php</span>
+
+
+<span class="kd">class</span> <span class="nc">TransactionCreated</span>
+<span class="p">{</span>
+    <span class="kn">use</span> <span class="nc">Dispatchable</span><span class="p">,</span> <span class="nc">SerializesModels</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="n">__construct</span><span class="p">(</span>
+        <span class="kt">public</span> <span class="nc">Transaction</span> <span class="nv">$transaction</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">{</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TransactionUpdated</span>
+<span class="p">{</span>
+    <span class="kn">use</span> <span class="nc">Dispatchable</span><span class="p">,</span> <span class="nc">SerializesModels</span><span class="p">;</span>
+
+    <span class="cd">/** @var Collection&lt;string, { old: string, new: string }&gt; */</span>
+    <span class="k">public</span> <span class="kt">Collection</span> <span class="nv">$changes</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="n">__construct</span><span class="p">(</span>
+        <span class="kt">public</span> <span class="nc">Transaction</span> <span class="nv">$transaction</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/*
+         * Have to record the changes in a separate dictionary, because if this
+         * event's listeners execute asynchronously, `-&gt;getOriginal()` method
+         * on the model will no longer contain what was changed.
+         */</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="n">changes</span> <span class="o">=</span> <span class="cm">/* implementation detail here */</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TransactionDeleted</span>
+<span class="p">{</span>
+    <span class="kn">use</span> <span class="nc">Dispatchable</span><span class="p">,</span> <span class="nc">SerializesModels</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="n">__construct</span><span class="p">(</span>
+        <span class="kt">public</span> <span class="nc">Transaction</span> <span class="nv">$transaction</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">{</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<details>
+  <summary>And configure model to fire them.</summary>
+
+  <div class="language-php highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1">// File: app/Models/Transaction.php</span>
+
+<span class="kd">class</span> <span class="nc">Transaction</span> <span class="kd">extends</span> <span class="nc">Model</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$dispatchesEvents</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">'created'</span> <span class="o">=&gt;</span> <span class="nc">TransactionCreated</span><span class="o">::</span><span class="n">class</span><span class="p">,</span>
+        <span class="s1">'updated'</span> <span class="o">=&gt;</span> <span class="nc">TransactionUpdated</span><span class="o">::</span><span class="n">class</span><span class="p">,</span>
+        <span class="s1">'deleted'</span> <span class="o">=&gt;</span> <span class="nc">TransactionDeleted</span><span class="o">::</span><span class="n">class</span><span class="p">,</span>
+    <span class="p">];</span>
+
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>  </div>
+</details>
+
+<h4 id="step-2-create-the-listener">Step 2: Create the listener</h4>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">UpdateAccountBalance</span> <span class="kd">implements</span> <span class="nc">ShouldQueue</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">handle</span><span class="p">(</span><span class="kt">TransactionCreated</span> <span class="o">|</span> <span class="nc">TransactionUpdated</span> <span class="o">|</span> <span class="nc">TransactionDeleted</span> <span class="nv">$event</span><span class="p">):</span> <span class="kt">void</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$event</span> <span class="k">instanceof</span> <span class="nc">TransactionUpdated</span> <span class="o">&amp;&amp;</span> <span class="nv">$event</span><span class="o">-&gt;</span><span class="nf">hasAccountChanged</span><span class="p">())</span> <span class="p">{</span>
+            <span class="nv">$oldAccount</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">find</span><span class="p">(</span><span class="nv">$event</span><span class="o">-&gt;</span><span class="n">changes</span><span class="p">[</span><span class="s1">'account_id'</span><span class="p">][</span><span class="s1">'old'</span><span class="p">]);</span>
+
+            <span class="nv">$oldAccount</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">([</span>
+                <span class="s1">'balance'</span> <span class="o">=&gt;</span> <span class="nv">$oldAccount</span><span class="o">-&gt;</span><span class="nf">transactions</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+            <span class="p">]);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nv">$event</span><span class="o">-&gt;</span><span class="n">transaction</span><span class="o">-&gt;</span><span class="n">account</span><span class="p">;</span>
+
+        <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">([</span>
+            <span class="s1">'balance'</span> <span class="o">=&gt;</span> <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">transactions</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+        <span class="p">]);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<details>
+  <summary>And attach the listener to the events.</summary>
+
+  <div class="language-php highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1">// File: app/Providers/EventServiceProvider.php</span>
+
+<span class="kd">class</span> <span class="nc">EventServiceProvider</span> <span class="kd">extends</span> <span class="nc">ServiceProvider</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="nv">$listen</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nc">TransactionCreated</span><span class="o">::</span><span class="n">class</span> <span class="o">=&gt;</span> <span class="p">[</span>
+            <span class="nc">UpdateAccountBalance</span><span class="o">::</span><span class="n">class</span><span class="p">,</span>
+        <span class="p">],</span>
+
+        <span class="nc">TransactionUpdated</span><span class="o">::</span><span class="n">class</span> <span class="o">=&gt;</span> <span class="p">[</span>
+            <span class="nc">UpdateAccountBalance</span><span class="o">::</span><span class="n">class</span><span class="p">,</span>
+        <span class="p">],</span>
+
+        <span class="nc">TransactionDeleted</span><span class="o">::</span><span class="n">class</span> <span class="o">=&gt;</span> <span class="p">[</span>
+            <span class="nc">UpdateAccountBalance</span><span class="o">::</span><span class="n">class</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>  </div>
+</details>
+
+<h4 id="step-3-clean-up-the-controller">Step 3: Clean up the controller</h4>
+
+<p>With the events and listeners ready, we no longer need the extra bits in the controller methods.</p>
+
+<details>
+  <summary>
+Click to see the full, cleaned up controller code.
+</summary>
+
+  <div class="language-php highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1">// File: app/Http/Controllers/TransactionController.php</span>
+
+<span class="kd">class</span> <span class="nc">TransactionController</span> <span class="kd">extends</span> <span class="nc">Controller</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">store</span><span class="p">(</span><span class="kt">Request</span> <span class="nv">$request</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$data</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">validate</span><span class="p">([</span>
+            <span class="s1">'account_id'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+                <span class="s1">'required'</span><span class="p">,</span>
+                <span class="s1">'uuid'</span><span class="p">,</span>
+                <span class="nc">Rule</span><span class="o">::</span><span class="nf">exists</span><span class="p">(</span><span class="nc">Account</span><span class="o">::</span><span class="n">class</span><span class="p">,</span> <span class="s1">'id'</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">where</span><span class="p">(</span><span class="s1">'user_id'</span><span class="p">,</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">user</span><span class="p">())</span>
+            <span class="p">],</span>
+            <span class="s1">'amount'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'numeric'</span><span class="p">],</span>
+            <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'date:Y-m-d'</span><span class="p">],</span>
+        <span class="p">]);</span>
+
+        <span class="nv">$transaction</span> <span class="o">=</span> <span class="nc">Transaction</span><span class="o">::</span><span class="nf">create</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nf">response</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">json</span><span class="p">([</span><span class="s1">'data'</span> <span class="o">=&gt;</span> <span class="nv">$transaction</span><span class="p">],</span> <span class="mi">201</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">function</span> <span class="n">update</span><span class="p">(</span><span class="kt">Request</span> <span class="nv">$request</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$data</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">validate</span><span class="p">([</span>
+            <span class="s1">'account_id'</span> <span class="o">=&gt;</span> <span class="p">[</span>
+                <span class="s1">'required'</span><span class="p">,</span>
+                <span class="s1">'uuid'</span><span class="p">,</span>
+                <span class="nc">Rule</span><span class="o">::</span><span class="nf">exists</span><span class="p">(</span><span class="nc">Account</span><span class="o">::</span><span class="n">class</span><span class="p">,</span> <span class="s1">'id'</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">where</span><span class="p">(</span><span class="s1">'user_id'</span><span class="p">,</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="nf">user</span><span class="p">())</span>
+            <span class="p">],</span>
+            <span class="s1">'amount'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'numeric'</span><span class="p">],</span>
+            <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="s1">'required'</span><span class="p">,</span> <span class="s1">'date:Y-m-d'</span><span class="p">],</span>
+        <span class="p">]);</span>
+
+        <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">(</span><span class="nv">$data</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="nf">response</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">json</span><span class="p">([</span><span class="s1">'data'</span> <span class="o">=&gt;</span> <span class="nv">$transaction</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">function</span> <span class="n">delete</span><span class="p">(</span><span class="kt">Request</span> <span class="nv">$request</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="n">account</span><span class="p">;</span>
+
+        <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="nb">delete</span><span class="p">();</span>
+
+        <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">update</span><span class="p">([</span>
+            <span class="s1">'balance'</span> <span class="o">=&gt;</span> <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">transactions</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+        <span class="p">]);</span>
+
+        <span class="k">return</span> <span class="nf">response</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="mi">204</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>  </div>
+
+  <p>Pretty clean, eh?</p>
+</details>
+
+<h4 id="step-4-optional-more-organisation">Step 4, optional: More organisation</h4>
+
+<p>Now that I have decoupled account balance update from transaction API endpoints, I can also decouple its test from the API calls as well.</p>
+
+<p>So instead of this:</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// File: tests/Feature/Accounts/AccountBalancesTest.php</span>
+
+<span class="kd">class</span> <span class="nc">AccountBalancesTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
+<span class="p">{</span>
+    <span class="cd">/** @test */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">past_transactions_affect_account_balance</span><span class="p">():</span> <span class="kt">void</span>
+    <span class="p">{</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+
+        <span class="nv">$postData</span> <span class="o">=</span> <span class="nc">Transaction</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span>
+            <span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$account</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="nf">makeOne</span><span class="p">([</span><span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">addDays</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">format</span><span class="p">(</span><span class="s1">'Y-m-d'</span><span class="p">)])</span>
+            <span class="o">-&gt;</span><span class="nf">only</span><span class="p">([</span>
+                <span class="s1">'account_id'</span><span class="p">,</span>
+                <span class="s1">'amount'</span><span class="p">,</span>
+                <span class="s1">'transaction_date'</span><span class="p">,</span>
+            <span class="p">]);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nv">$account</span><span class="o">-&gt;</span><span class="n">user</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="nf">postJson</span><span class="p">(</span><span class="s1">'v1/transactions'</span><span class="p">,</span> <span class="nv">$postData</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="nf">assertSuccessful</span><span class="p">()</span>
+
+        <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">refresh</span><span class="p">();</span>
+
+        <span class="c1">// This is a custom assertion method I made that effectively runs</span>
+        <span class="c1">// `-&gt;assertEquals($one-&gt;getAmount(), $two-&gt;getAmount())`.</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">assertMoneyEquals</span><span class="p">(</span>
+            <span class="nv">$transactions</span><span class="o">-&gt;</span><span class="nf">sum</span><span class="p">(</span><span class="s1">'amount'</span><span class="p">),</span>
+            <span class="nv">$account</span><span class="o">-&gt;</span><span class="n">balance</span><span class="p">,</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>… I can have this as the test:</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// File: tests/Feature/Accounts/AccountBalancesTest.php</span>
+
+<span class="kd">class</span> <span class="nc">AccountBalancesTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
+<span class="p">{</span>
+    <span class="cd">/** @test */</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">past_transactions_affect_account_balance</span><span class="p">():</span> <span class="kt">void</span>
+    <span class="p">{</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+
+        <span class="nv">$transaction</span> <span class="o">=</span> <span class="nc">Transaction</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$account</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">([</span>
+            <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">addDays</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">format</span><span class="p">(</span><span class="s1">'Y-m-d'</span><span class="p">),</span>
+        <span class="p">]);</span>
+
+        <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">refresh</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">assertMoneyEquals</span><span class="p">(</span>
+            <span class="nv">$transaction</span><span class="o">-&gt;</span><span class="n">amount</span><span class="p">,</span>
+            <span class="nv">$account</span><span class="o">-&gt;</span><span class="n">balance</span><span class="p">,</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The result is:</p>
+
+<ul>
+  <li>Test methods are slimmer.</li>
+  <li>More resilient test:
+    <ul>
+      <li>It will still work even if the endpoint changes.</li>
+    </ul>
+  </li>
+  <li>More resilient implementation:
+    <ul>
+      <li>Everything will still work if transactions are updated from another place.</li>
+      <li>The account balance recalculation is automatic and implicit. If you implement transaction creation on another endpoint or an Artisan command, you don’t need to remember to trigger the recalculation.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="wrap-up">Wrap up</h2>
+
+<p>What my theory proposes here isn’t that we should cram everything into controllers and leave them there forever. That is not maintainable for most real world products. But the point is that adhering to DRY convention religiously and trying to optimise everything from the get go is also rarely effective.</p>
+
+<p>I’m proposing that we should <em>start by</em> cramming things into a controller first, make the tests pass, and then reorganise the code where it’s obviously meaningful to do so. You can choose to reorganise immediately, or you can come back to it later if the need arises at any future point.</p>
+
+<p>Although the example I have shown in this article is somewhat simple, the approach is not limited to any level of complexity. The actual implementations in this app (even the specific feature I wrote about) have a lot more complexity and detail, and so far I haven’t seen any downsides to my approach. As a counterargument I must acknowledge that this is a barely year-old app that I’ve only been dogfooding for a couple months.</p>
+
+<h2 id="acknowledgements">Acknowledgements</h2>
+
+<p>This is <em>not</em> a novel idea. <a href="https://martinfowler.com/bliki/Yagni.html" target="_blank">Martin Fowler wrote about YAGNI</a> 9 years ago, <a href="https://kentcdodds.com/blog/aha-programming" target="_blank">Kent C. Dodds wrote about AHA</a> 4 years ago, <a href="https://en.wikipedia.org/wiki/KISS_principle" target="_blank">KISS principle</a> has been around in software development circles for a long time, <a href="https://en.wikipedia.org/wiki/Minimum_viable_product" target="_blank">MVP</a> is a widely known product development strategy, and there are a few other acronyms out there that are more or less in line with my approach.</p>
+</body></html>
+
+    </div>
+</article>
+
+        </div>
+    </body>
+</html>
