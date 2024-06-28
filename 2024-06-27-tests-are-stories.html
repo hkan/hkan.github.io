@@ -29,7 +29,7 @@
     content="Because of the way I was repeatedly taught about how to test software, it always confused me. Many lessons out there talk about unit tests, or otherwise show..."
   />
    
-  <meta property="og:title" content="Tests are stories" />
+  <meta property="og:title" content="My tests are stories" />
   <meta property="og:type" content="article" />
    
   <meta
@@ -44,7 +44,7 @@
   
 
   <title>
-     Tests are stories
+     My tests are stories
     &mdash; Hakan Aktaş 
   </title>
 </head>
@@ -60,7 +60,7 @@
 </section>
  <article class="px-4 pb-8 lg:px-0 lg:pb-20">
     <h1 class="text-4xl font-semibold tracking-tight text-stone-700">
-        Tests are stories
+        My tests are stories
     </h1>
 
     <time
@@ -77,11 +77,11 @@
     >
         <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html><body>
-<p>Because of the way I was repeatedly taught about how to test software, it always confused me. Many lessons out there talk about unit tests, or otherwise show unrealistically simple examples. They tell you how to pass values to a function, and how to assert its return value.</p>
+<p>Because of the way I was repeatedly taught about how to test software, it always confused me. Many lessons out there talk about unit tests, or otherwise show unrealistically simple examples. They tell me how to pass values to a function, and how to assert its return value.</p>
 
-<p>In web application development, that’s rarely what you need from tests to have confidence that your app will not come crashing down.</p>
+<p>Unit tests have their own qualities, of course. But when I’m building a digital product, I want to have confidence that my app won’t come crashing down. Testing small bits of code in isolation rarely gives me that confidence.</p>
 
-<p>Instead, you want to write stories. Like children’s stories. Concise, clear, and gives a message at the end.</p>
+<p>Instead, I write stories. Like children’s stories. Concise, clear, and gives a message at the end.</p>
 
 <blockquote>
   <p>Once upon a time, there was an almighty accountant. They knew all numbers, they knew everyone’s accounts.</p>
@@ -90,7 +90,7 @@
 
   <p>The knight told the accountant they spent 10 shillings from the category on that faithful day.</p>
 
-  <p>The almighty accountant has accepted this, and recorded the transaction in their holy book!</p>
+  <p>The almighty accountant accepted this, and recorded the transaction in their holy book!</p>
 </blockquote>
 
 <p>Now, of course I don’t imagine fables like this for every single test I write. That would be totally silly. No sire!</p>
@@ -103,9 +103,9 @@
     <span class="k">public</span> <span class="k">function</span> <span class="n">user_can_create_expense_transaction</span><span class="p">():</span> <span class="kt">void</span>
     <span class="p">{</span>
         <span class="nv">$category</span> <span class="o">=</span> <span class="nc">Category</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
-        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="k">for</span><span class="p">(</span><span class="nv">$category</span><span class="o">-&gt;</span><span class="n">group</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$category</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
 
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nv">$category</span><span class="o">-&gt;</span><span class="n">group</span><span class="o">-&gt;</span><span class="n">budget</span><span class="o">-&gt;</span><span class="n">user</span><span class="p">)</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nv">$category</span><span class="o">-&gt;</span><span class="n">budget</span><span class="o">-&gt;</span><span class="n">user</span><span class="p">)</span>
             <span class="o">-&gt;</span><span class="nf">postJson</span><span class="p">(</span><span class="s1">'/v1/transactions'</span><span class="p">,</span> <span class="p">[</span>
                 <span class="s1">'category_id'</span> <span class="o">=&gt;</span> <span class="nv">$category</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span>
                 <span class="s1">'account_id'</span> <span class="o">=&gt;</span> <span class="nv">$account</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span>
@@ -122,7 +122,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>It starts by setting up the fairy world, acts the main occasion, and ends with the moral of the story and the lessons.</p>
+<p>It starts by setting up the fairy world, creating the necessary data. Acts the main occasion, the API request. Ends with the moral of the story and the lessons, that the API request has succeeded and the transaction is recorded.</p>
 
 <p>Just for the fun of it, let’s also do a negative outcome story.</p>
 
@@ -133,7 +133,7 @@
 
   <p>The ugly witch told the accountant the knight had spent 10 shillings from the category on that faithful day.</p>
 
-  <p>The almighty accountant has rejected this, saying they don’t know what knight the witch is talking about.</p>
+  <p>The almighty accountant rejected this, saying they don’t know what knight the witch is talking about.</p>
 </blockquote>
 
 <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">AddingTransactionsTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
@@ -142,7 +142,7 @@
     <span class="k">public</span> <span class="k">function</span> <span class="n">users_cannot_create_transactions_to_others_accounts</span><span class="p">():</span> <span class="kt">void</span>
     <span class="p">{</span>
         <span class="nv">$category</span> <span class="o">=</span> <span class="nc">Category</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
-        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="k">for</span><span class="p">(</span><span class="nv">$category</span><span class="o">-&gt;</span><span class="n">group</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$category</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
 
         <span class="c1">// Notice the actor is a different, new user</span>
         <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nc">User</span><span class="o">::</span><span class="nf">create</span><span class="p">())</span>
@@ -158,21 +158,23 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Each story is one page in your [test suite] book.</p>
+<p>Each story is one metaphorical page in my [test suite] book.</p>
 
-<h2 id="stories-need-to-be-unscattered">Stories need to be unscattered</h2>
+<h2 id="stories-need-to-be-linear">Stories need to be linear</h2>
 
 <blockquote>
   <p>Once upon a time, there was an almighty accountant. They knew all numbers, they knew everyone’s accounts.</p>
 
-  <p>The ugly witch told the accountant the knight has spent 10 shillings from the category on that faithful day.</p>
+  <p><span class="text-gray-300 line-through">There was a category and a checking account that belonged to a knight with a white horse.</span></p>
+
+  <p>The ugly witch told the accountant the knight had spent 10 shillings from the category on that faithful day.</p>
 
   <p>The almighty app has rejected this, saying it doesn’t know what knight the witch is talking about.</p>
 </blockquote>
 
-<p>This makes some sense, but it’s clear <em>something</em> is missing, right? Like, what knight? What category?? Even the almighty accountant doesn’t know.</p>
+<p>This almost makes sense, but with the deleted part, it reads incomplete. Like, what knight? What category?? Even the almighty accountant doesn’t know.</p>
 
-<p>Then you turn the pages back to the beginning of the chapter, and notice that they said…</p>
+<p>Then I turn a couple pages back to the beginning of the chapter, and notice that the book says…</p>
 
 <blockquote>
   <p>Just so you know, there is a category and a checking account that belonged to a knight with a white horse.</p>
@@ -190,7 +192,7 @@
         <span class="nv">$this</span><span class="o">-&gt;</span><span class="n">category</span> <span class="o">=</span> <span class="nc">Category</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
 
         <span class="nv">$this</span><span class="o">-&gt;</span><span class="n">account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span>
-            <span class="o">-&gt;</span><span class="k">for</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="n">category</span><span class="o">-&gt;</span><span class="n">group</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="k">for</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="n">category</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span>
             <span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
     <span class="p">}</span>
 
@@ -213,27 +215,11 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>The story is dispersed to weakly connected pages. You need to jump between pages to see the full picture. Maybe just one page, maybe 10s of pages. Your mind struggles to maintain the image of this fairy world.</p>
+<p>The story is split into parts with different stories in between. I need to jump between the metaphorical pages to see the full picture. Maybe just one page, maybe 10s of pages. My mind struggles to maintain the image of this fairy world.</p>
 
-<p>Keep your story in one place, and keep it fluent.</p>
+<p>I instead keep my story in one place, keep it linear, and keep it fluent.</p>
 
 <h2 id="longer-stories-are-fine">Longer stories are fine</h2>
-
-<blockquote>
-  <p>Once upon a time, there was an almighty accountant. They knew all numbers, they knew everyone’s accounts.</p>
-
-  <p>There was a checking account that belonged to a knight with a white horse.</p>
-
-  <p>The knight had made 95 shillings in the beginning of the harvest season.</p>
-
-  <p>Until the end of the season, the knight had spent 10 shillings on bread, 10 shillings on ale, and 15 shillings on taxes.</p>
-
-  <p>The knight knew he will have to spend another 20 shillings by the next growing season, but also make another 90 until then.</p>
-
-  <p>When the knight asked the accountant what his financial situation is…</p>
-
-  <p>The almighty accountant told him he has 60 shillings now, and will have 135 shillings left for spending until the end of growing season.</p>
-</blockquote>
 
 <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">AccountBalanceCalculationTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
 <span class="p">{</span>
@@ -248,7 +234,7 @@
         <span class="c1">// Income of last harvest season</span>
         <span class="nc">Transaction</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$account</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">([</span>
             <span class="s1">'amount'</span> <span class="o">=&gt;</span> <span class="mi">95</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
-            <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">subDays</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+            <span class="s1">'transaction_date'</span> <span class="o">=&gt;</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">subDays</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
         <span class="p">]);</span>
 
         <span class="c1">// Spent 10 on bread</span>
@@ -298,68 +284,83 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Quite the long test method, right? But is it confusing when you read from start to end? I don’t think so.</p>
+<p>Quite the long test method, right? I honestly don’t mind. Even when there are 10s of test methods similar to this.</p>
 
-<p>I much rather see directly in front of my eyes why the account balance came to be <code class="language-plaintext highlighter-rouge">60 * 100</code>. It’s always more cognitive load  if I need to jump between distant places of the code.</p>
+<p>My monitor fits about 35 lines in the tallest IDE viewport, this example test is 45 lines. Just a tiny bit of scroll does it. Compared to having 30 lines in <code class="language-plaintext highlighter-rouge">setUp</code>, then maybe some collapsed methods, then another 15 lines in the test method; this feels more clear.</p>
+
+<p>I also much rather see directly why the account balance should evaluate to <code class="language-plaintext highlighter-rouge">60 * 100</code>. It’s always more cognitive load if I need to jump between disconnected places in the test code.</p>
+
+<p>In the next section, I will touch upon how to reduce crowd in test methods while still keeping up with the same standards.</p>
 
 <h2 id="abstraction-is-okay-creating-test-data-externally-isnt">Abstraction is okay, creating test data externally isn’t</h2>
 
-<h3 id="your-tests-dont-care-about-every-detail">Your tests don’t care about every detail</h3>
-
-<p>Just like database communications are abstracted to Eloquent models (compared to writing SQL queries), we also defer plenty of other things to some abstractions that run behind the scene.</p>
+<h3 id="prelude-there-are-already-many-abstractions">Prelude: There are already <em>many</em> abstractions</h3>
 
 <ul>
-  <li>No tests ever boot up Laravel, for example, that’s done in <code class="language-plaintext highlighter-rouge">Illuminate\Foundation\Testing\TestCase</code>.</li>
-  <li>We don’t use only the most basic <code class="language-plaintext highlighter-rouge">$this-&gt;assertTrue()</code> function, we use abstracted assertion logic.</li>
+  <li>Database communications are abstracted with Eloquent models, we don’t (usually) write SQL queries.</li>
+  <li>No tests ever boot up Laravel, that’s done in <code class="language-plaintext highlighter-rouge">Illuminate\Foundation\Testing\TestCase</code>.</li>
+  <li>We don’t use only the most basic <code class="language-plaintext highlighter-rouge">$this-&gt;assertTrue()</code> function, we use assertion functions built upon it.</li>
+  <li>In the storytelling metaphor, I didn’t define what a checking account is. I assumed the reader (the test runner) knows that.</li>
 </ul>
 
-<p>In the storytelling metaphor, I didn’t define what a checking account is. I assumed the reader (the test runner) knows that.</p>
+<h3 id="creating-my-own-abstractions-to-make-tests-even-more-fluent">Creating my own abstractions to make tests even more fluent</h3>
 
-<p>–</p>
+<p>In the same spirit I can make my own abstractions, too. Following up from the last example above, I know transaction creations are roughly the same, and in that whole test class I only care that a transaction exists with a certain amount and on certain dates.</p>
 
-<p>In the same spirit you can abstract things yourself, too. Maybe you have some specific implementation detail, and you don’t want to have that within your test methods.</p>
-
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">ListingCategoriesTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">AccountBalanceCalculationTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
 <span class="p">{</span>
-    <span class="k">public</span> <span class="k">function</span> <span class="n">setUp</span><span class="p">()</span>
+    <span class="c1">#[Test]</span>
+    <span class="k">public</span> <span class="k">function</span> <span class="n">future_transactions_affect_account_balance_when_they_are_entered</span><span class="p">():</span> <span class="kt">void</span>
     <span class="p">{</span>
-        <span class="k">parent</span><span class="o">::</span><span class="nf">setUp</span><span class="p">();</span>
+        <span class="nv">$account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+        <span class="nv">$breadCategory</span> <span class="o">=</span> <span class="nc">Category</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$account</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+        <span class="nv">$aleCategory</span> <span class="o">=</span> <span class="nc">Category</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$account</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
+        <span class="nv">$taxesCategory</span> <span class="o">=</span> <span class="nc">Category</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$account</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
 
-        <span class="c1">// I'm effectively disabling this listener here, because I don't want</span>
-        <span class="c1">// category auto-population in any of the tests here. I want all of</span>
-        <span class="c1">// these tests to control what categories exist in the system.</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">fake</span><span class="p">(</span><span class="err">\</span><span class="nc">App\Listeners\PopulateCategoriesOfNewBudget</span><span class="o">::</span><span class="n">class</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
+        <span class="c1">// Past transactions</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">createTrx</span><span class="p">(</span><span class="mi">95</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>  <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">subDays</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="nv">$account</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">createTrx</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">subDays</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="nv">$breadCategory</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">createTrx</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">subDays</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="nv">$aleCategory</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">createTrx</span><span class="p">(</span><span class="o">-</span><span class="mi">15</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">subDays</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="nv">$taxesCategory</span><span class="p">);</span>
 
-<p>If you have a 3rd party integration and you don’t want to control every bit of the interaction with it, you can abstract it in a way where you only need to define the details you care in test methods.</p>
+        <span class="c1">// Future transactions</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">createTrx</span><span class="p">(</span><span class="mi">90</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>  <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">addDays</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="nv">$account</span><span class="p">);</span>
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">createTrx</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">addDays</span><span class="p">(</span><span class="mi">40</span><span class="p">),</span> <span class="nv">$taxesCategory</span><span class="p">);</span>
 
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">SomePurchasingFlowTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
-<span class="p">{</span>
-    <span class="k">public</span> <span class="k">function</span> <span class="n">failed_payment_is_communicated_to_user</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="c1">// Test doesn't necessarily care how Stripe is mocked,</span>
-        <span class="c1">// so it's abstracted.</span>
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">mockStripePayment</span><span class="p">(</span>
-            <span class="n">result</span><span class="o">:</span> <span class="nc">StripeResult</span><span class="o">::</span><span class="nc">PaymentFailed</span><span class="p">,</span>
+        <span class="nv">$account</span><span class="o">-&gt;</span><span class="nf">refresh</span><span class="p">();</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">assertMoneyEquals</span><span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="nv">$account</span><span class="o">-&gt;</span><span class="n">balance</span><span class="p">);</span>
+
+        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">assertAccountBalanceBecomes</span><span class="p">(</span>
+            <span class="mi">135</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="nv">$account</span><span class="p">,</span>
+            <span class="nf">today</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">addDays</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">addMinute</span><span class="p">(),</span>
         <span class="p">);</span>
+    <span class="p">}</span>
 
-        <span class="nv">$this</span>
-            <span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nc">User</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">())</span>
-            <span class="o">-&gt;</span><span class="nf">postJson</span><span class="p">(</span><span class="s1">'/v1/purchase'</span><span class="p">,</span> <span class="p">[</span>
-                <span class="s1">'products'</span> <span class="o">=&gt;</span> <span class="p">[</span>
-                    <span class="nc">Product</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span>
-                <span class="p">],</span>
-            <span class="p">])</span>
-            <span class="o">-&gt;</span><span class="nf">assertPaymentRequired</span><span class="p">();</span>
+    <span class="k">private</span> <span class="k">function</span> <span class="n">createTrx</span><span class="p">(</span>
+        <span class="kt">int</span> <span class="nv">$amount</span><span class="p">,</span>
+        <span class="kt">Carbon</span> <span class="nv">$date</span><span class="p">,</span>
+        <span class="kt">Account</span><span class="o">|</span><span class="nc">Category</span> <span class="nv">$accountOrCategory</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// My test function doesn't need to care what this implementation looks like.</span>
+    <span class="p">}</span>
+
+    <span class="k">private</span> <span class="k">function</span> <span class="n">assertAccountBalanceBecomes</span><span class="p">(</span>
+        <span class="kt">int</span> <span class="nv">$amount</span><span class="p">,</span>
+        <span class="kt">Account</span> <span class="nv">$account</span><span class="p">,</span>
+        <span class="kt">Carbon</span> <span class="nv">$when</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// My test function doesn't need to care what this implementation looks like.</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>–</p>
+<p>Now my test method is only 22 lines, but it still ends up doing the exact same work, with the same standards.</p>
 
-<p>You might have also noticed that my code mentions an entity called budget. But nowhere in the test method do I create or define it. That’s because a budget’s existence is not immediately relevant to these test cases I displayed so far. The budget is created in a factory automatically based on the factory definitions.</p>
+<h3 id="model-factories-allow-tests-to-stay-focused-on-data-that-matters">Model factories allow tests to stay focused on data that matters</h3>
+
+<p>You might have noticed that my code mentions an entity called budget. But nowhere in the tests do I create or define it. That’s because a budget’s existence is not immediately relevant to these tests I displayed so far. The budget is created within factories automatically.</p>
 
 <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">AccountFactory</span> <span class="kd">extends</span> <span class="nc">ModelFactory</span>
 <span class="p">{</span>
@@ -367,47 +368,25 @@
     <span class="p">{</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="s1">'budget_id'</span> <span class="o">=&gt;</span> <span class="nc">Budget</span><span class="o">::</span><span class="nf">factory</span><span class="p">(),</span>
-            <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="n">faker</span><span class="o">-&gt;</span><span class="nf">words</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span>
+            <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="s1">'My budget'</span><span class="p">,</span>
         <span class="p">];</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>The awesome model factories of Laravel enables me to only create the data I care about in my tests, and it handles all the rest of data creation for me.</p>
+<p>The awesome <a href="https://laravel.com/docs/11.x/eloquent-factories" target="_blank">Laravel model factories</a> enable me to only create the data I care about in my tests, and it handles all the other necessary data creation for me.</p>
 
-<p>If another test cares about what specific budget is created, the test explicitly creates it.</p>
-
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">CreatingAccountsTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
-<span class="p">{</span>
-    <span class="c1">#[Test]</span>
-    <span class="k">public</span> <span class="k">function</span> <span class="n">it_rejects_budget_id_of_another_user</span><span class="p">():</span> <span class="kt">void</span>
-    <span class="p">{</span>
-        <span class="nv">$user</span> <span class="o">=</span> <span class="nc">User</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
-
-        <span class="c1">// I want a specific budget here that is created for the given user.</span>
-        <span class="nv">$budget</span> <span class="o">=</span> <span class="nc">Budget</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">recycle</span><span class="p">(</span><span class="nv">$user</span><span class="p">)</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
-
-        <span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">actingAs</span><span class="p">(</span><span class="nc">User</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">())</span>
-            <span class="o">-&gt;</span><span class="nf">postJson</span><span class="p">(</span><span class="s1">'v1/accounts'</span><span class="p">,</span> <span class="p">[</span>
-                <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="s1">'Test Account'</span><span class="p">,</span>
-                <span class="s1">'budget_id'</span> <span class="o">=&gt;</span> <span class="nv">$budget</span><span class="o">-&gt;</span><span class="n">id</span><span class="p">,</span>
-            <span class="p">])</span>
-            <span class="o">-&gt;</span><span class="nf">assertJsonValidationErrors</span><span class="p">([</span>
-                <span class="s1">'budget_id'</span><span class="p">,</span>
-            <span class="p">]);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
+<p>With a good factory setup that covers all models, my tests never have to deal with setting up “base” data.</p>
 
 <h3 id="test-methods-need-to-maintain-control-of-the-world-building">Test methods need to maintain control of the world building</h3>
 
 <p>Implicitly or explicitly, a test method should have complete control over all the data created for its execution.</p>
 
-<p>We have already touched upon implicit data creation just above with factories creating needed data behind the scenes. Continuing that conversation; even if the test doesn’t create a budget explicitly, it still has complete control over what kind of budget is created. It can always create its own budget instance, and tell <code class="language-plaintext highlighter-rouge">AccountFactory</code> to use it.</p>
+<p>We have already touched upon implicit data creation just above with factories. Continuing that conversation; even if the test doesn’t create a budget explicitly, it still has complete control over what kind of budget is created. It can always create its own budget instance, and tell <code class="language-plaintext highlighter-rouge">AccountFactory</code> to use it.</p>
 
 <p>What’s <strong>not</strong> ideal is creating anything before or after the test method runs in a common and unspecific place, such as <code class="language-plaintext highlighter-rouge">setUp</code> method. Or worse, in traits’ setup methods, in the extended parent classes like <code class="language-plaintext highlighter-rouge">Tests\TestCase</code>.</p>
 
-<p>Let’s take another look at the example from <em>Stories need to be unscattered</em> section:</p>
+<p>Let’s take another look at the example from <em>Stories need to be linear</em> section:</p>
 
 <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">AddingTransactionsTest</span> <span class="kd">extends</span> <span class="nc">TestCase</span>
 <span class="p">{</span>
@@ -421,7 +400,7 @@
         <span class="nv">$this</span><span class="o">-&gt;</span><span class="n">category</span> <span class="o">=</span> <span class="nc">Category</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span><span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
 
         <span class="nv">$this</span><span class="o">-&gt;</span><span class="n">account</span> <span class="o">=</span> <span class="nc">Account</span><span class="o">::</span><span class="nf">factory</span><span class="p">()</span>
-            <span class="o">-&gt;</span><span class="k">for</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="n">category</span><span class="o">-&gt;</span><span class="n">group</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span>
+            <span class="o">-&gt;</span><span class="k">for</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="n">category</span><span class="o">-&gt;</span><span class="n">budget</span><span class="p">)</span>
             <span class="o">-&gt;</span><span class="nf">create</span><span class="p">();</span>
     <span class="p">}</span>
 
@@ -451,41 +430,43 @@
 <table>
   <thead>
     <tr>
-      <th>Need</th>
+      <th><span class="italic whitespace-nowrap">“I need to create a new test that …”</span></th>
       <th>With externally created data</th>
       <th>With only internally created data</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>New test that needs a single different category to exist in its world</td>
-      <td>It needs to update the one created outside</td>
-      <td>It creates the category it needs</td>
+      <td>Needs a single different category to exist in its world</td>
+      <td>The new test needs to update the one created outside</td>
+      <td>The new test creates the category it needs</td>
     </tr>
     <tr>
-      <td>New test that needs no categories to exist</td>
-      <td>It needs to remove the one created outside</td>
-      <td>It creates no categories</td>
+      <td>Needs no categories to exist</td>
+      <td>The new test needs to remove the one created outside</td>
+      <td>The new test creates no categories</td>
     </tr>
     <tr>
-      <td>New test that asserts some category count</td>
-      <td>It has to account for the category created outside</td>
-      <td>It doesn’t need to account for categories created outside</td>
+      <td>Asserts some category count</td>
+      <td>The new test has to account for the category created outside</td>
+      <td>The new test doesn’t need to account for categories created outside</td>
     </tr>
   </tbody>
 </table>
 
 <p>Also, the test story would start like “there was a category but then it was removed, don’t worry about it”. That’s a terrible story…</p>
 
-<p>In the real world, this might not be a problem with some of your tests throughout the lifetime of your software and it might never require to be refactored.</p>
+<p>Realistically speaking, this may never be a problem with some of my tests. And throughout the lifetime of my app it may never require to be refactored.</p>
 
-<p>When you <em>do</em> need to refactor it, however, do you really want to refactor tens of test methods that have no direct relation with the feature you’re building?</p>
+<p>When/if I <em>do</em> need to refactor it, however, do I really want to refactor tens of test methods that have no direct relation with the feature I’m building?</p>
 
-<p>And what’s the trade we are making here? Avoiding duplicating a couple lines of code in each test? Not worth the bad story if you ask me.</p>
+<p>And for avoiding duplicating a couple lines of code in each test?</p>
+
+<p>Not worth the terrible story in my opinion.</p>
 
 <h2 id="conclusion">Conclusion</h2>
 
-<p>Tests are the one thing in a software project where I intentionally keep things as verbose as necessary. This has helped me so far in how I think about my product’s behavior, and in how I describe it as code. The whole test suit paints a clear picture of the software, and I see it as the seedlings of a proper product documentation.</p>
+<p>Tests are the one thing in a software project where I don’t avoid verbosity. This has helped me so far in how I think about my product’s behavior, and in how I describe it as code. The whole test suite paints a clear picture of the software, and I see it as the seedlings of a proper product documentation.</p>
 
 <p>Give it a go sometime for one feature test, and tell me how you feel about it!</p>
 
