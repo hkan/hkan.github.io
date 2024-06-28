@@ -3,11 +3,11 @@ title: My tests are stories
 date: 2024-06-28T00:00:00+03:00
 ---
 
-Because of the way I was repeatedly taught about how to test software, it always confused me. Many lessons out there talk about unit tests, or otherwise show unrealistically simple examples. They tell me how to pass values to a function, and how to assert its return value.
+I repeatedly attempted to learn how to test software, but for a long time it never fully clicked for me. Many lessons out there talk about unit tests, or otherwise show unrealistically simple examples. They tell me how to pass values to a function, and how to assert its return value.
 
 Unit tests have their own qualities, of course. But when I'm building a digital product, I want to have confidence that my app won't come crashing down. Testing small bits of code in isolation rarely gives me that confidence.
 
-Instead, I write stories. Like children's stories. Concise, clear, and gives a message at the end.
+Instead, I write stories. Like children's stories. Concise, clear, and with a message.
 
 > Once upon a time, there was an almighty accountant. They knew all numbers, they knew everyone's accounts.
 > 
